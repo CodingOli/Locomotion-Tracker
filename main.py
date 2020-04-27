@@ -1,9 +1,11 @@
 import cv2
 import sys
 import pandas as pd
+import shutil
+import os
 
 def resolucion():
-     #define the screen resulation
+    #define the screen resolution
     screen_res = 800, 600
     scale_width = screen_res[0] / frame.shape[1]
     scale_height = screen_res[1] / frame.shape[0]
@@ -19,12 +21,42 @@ def resolucion():
     #resize the window according to the screen resolution
     cv2.resizeWindow('Analisis del Movimiento', window_width, window_height)
 
+def revisarDirectorio(directorio):
+    try:
+        shutil.rmtree(directorio)
+    except OSError as e:
+        print('Creando directorio')
+
+    if not os.path.exists(directorio):
+        os.makedirs(directorio)
+
+def descomponerVideo(nombre):
+    vidcap = cv2.VideoCapture(nombre)
+    revisarDirectorio('frames')
+
+    success,image = vidcap.read()
+    count = 0
+    while success:
+
+        x="frames/frame%d.png" % count
+        cv2.imwrite(x, image)
+        # frames.append(x)    # save frame as JPEG file
+        success,image = vidcap.read()
+        #print('Read a new frame: ', success)
+        count += 1
+    print('Video Capturado')
+
 trackers=[]
 # Iniciar trackers
 for i in range(0,5):
     trackers.append(cv2.TrackerCSRT_create())
 
 x=input('Ingresa el nombre del video: ')
+y=input('¿Convertir a frames? (Y/N) ')
+
+if y=='Y' or y=='y' :
+    descomponerVideo(x)
+
 # Leer video
 video = cv2.VideoCapture(x)
 
